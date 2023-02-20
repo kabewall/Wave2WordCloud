@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "vosk-nlplot"
+version = "0.1.0"
+description = ""
+authors = ["watakabe_evixar <k.watakabe@evixar.com>"]
+readme = "README.md"
+packages = [{include = "vosk_nlplot"}]
+
+[tool.poetry.dependencies]
+python = "3.9.15"
+vosk = "0.3.43"
+nlplot = "1.6.0"
+mecab-python3 = "^1.0.6"
+
+[tool.poetry.group.dev.dependencies]
+autopep8 = "^2.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
