@@ -10,28 +10,28 @@ import numpy as np
 import MeCab
 
 # output.wavからtranscript.txtに単純書き起こし
-# wave_filename = "output.wav"
-# wf = wave.open(wave_filename, "rb")
-# if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
-#     print("Audio file must be WAV format mono PCM.")
-#     sys.exit(1)
-# model = Model(model_name="vosk-model-ja-0.22")
-# rec = KaldiRecognizer(model, wf.getframerate())
-# rec.SetWords(True)
-# rec.SetPartialWords(True)
-# with open("transcription.txt", "wb") as f:
-#     print("Transcripting...")
-#     for n in tqdm(range(wf.getnframes() // 4000 + 1)):
-#         data = wf.readframes(4000)
-#         if len(data) == 0:
-#             break
-#         if rec.AcceptWaveform(data):
-#             result_str = rec.Result()
-#             result_json = json.loads(result_str)
-#             text = result_json["text"].replace(" ", "")
-#             if text == "":
-#                 continue
-#             f.write(f"{text}\n".encode("utf-8"))
+wave_filename = "output.wav"
+wf = wave.open(wave_filename, "rb")
+if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
+    print("Audio file must be WAV format mono PCM.")
+    sys.exit(1)
+model = Model(model_name="vosk-model-ja-0.22")
+rec = KaldiRecognizer(model, wf.getframerate())
+rec.SetWords(True)
+rec.SetPartialWords(True)
+with open("transcription.txt", "wb") as f:
+    print("Transcripting...")
+    for n in tqdm(range(wf.getnframes() // 4000 + 1)):
+        data = wf.readframes(4000)
+        if len(data) == 0:
+            break
+        if rec.AcceptWaveform(data):
+            result_str = rec.Result()
+            result_json = json.loads(result_str)
+            text = result_json["text"].replace(" ", "")
+            if text == "":
+                continue
+            f.write(f"{text}\n".encode("utf-8"))
 
 # transcript.txtから形態素分析
 print("形態素分析中")
