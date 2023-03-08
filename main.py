@@ -8,30 +8,39 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import MeCab
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-i', "--input", default="output.wav")
+parser.add_argument('--use_transctiption', action="store_true")
+args = parser.parse_args()
 
 # output.wavからtranscript.txtに単純書き起こし
-wave_filename = "output.wav"
-wf = wave.open(wave_filename, "rb")
-if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
-    print("Audio file must be WAV format mono PCM.")
-    sys.exit(1)
-model = Model(model_name="vosk-model-ja-0.22")
-rec = KaldiRecognizer(model, wf.getframerate())
-rec.SetWords(True)
-rec.SetPartialWords(True)
-with open("transcription.txt", "wb") as f:
-    print("Transcripting...")
-    for n in tqdm(range(wf.getnframes() // 4000 + 1)):
-        data = wf.readframes(4000)
-        if len(data) == 0:
-            break
-        if rec.AcceptWaveform(data):
-            result_str = rec.Result()
-            result_json = json.loads(result_str)
-            text = result_json["text"].replace(" ", "")
-            if text == "":
-                continue
-            f.write(f"{text}\n".encode("utf-8"))
+if args.use_transctiption:
+    print("transcription.txtを使用します。")
+else:
+    wave_filename = args.input
+    wf = wave.open(wave_filename, "rb")
+    if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
+        print("Audio file must be WAV format mono PCM.")
+        sys.exit(1)
+    model = Model(model_name="vosk-model-ja-0.22")
+    rec = KaldiRecognizer(model, wf.getframerate())
+    rec.SetWords(True)
+    rec.SetPartialWords(True)
+    with open("transcription.txt", "wb") as f:
+        print("Transcripting...")
+        for n in tqdm(range(wf.getnframes() // 4000 + 1)):
+            data = wf.readframes(4000)
+            if len(data) == 0:
+                break
+            if rec.AcceptWaveform(data):
+                result_str = rec.Result()
+                result_json = json.loads(result_str)
+                text = result_json["text"].replace(" ", "")
+                if text == "":
+                    continue
+                f.write(f"{text}\n".encode("utf-8"))
 
 # transcript.txtから形態素分析
 print("形態素分析中")
@@ -79,8 +88,6 @@ df_text['words'] = df_text['text'].apply(mecab_analysis)
 # 全データ・#データサイエンティスト・#kaggleをそれぞれインスタンス化
 print("プロット作成中")
 npt = nlplot.NLPlot(df_text, target_col='words')
-# npt_ds = nlplot.NLPlot(df.query('searched_for == "#データサイエンティスト"'), target_col='hashtags')
-# npt_kaggle = nlplot.NLPlot(df.query('searched_for == "#kaggle"'), target_col='hashtags')
 stopwords = npt.get_stopword(top_n=2, min_freq=0)
 fig_wc = npt.wordcloud(
     width=500,
